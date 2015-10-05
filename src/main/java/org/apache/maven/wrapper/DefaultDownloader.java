@@ -26,6 +26,7 @@ import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 
 /**
  * @author Hans Dockter
@@ -74,10 +75,12 @@ public class DefaultDownloader
         OutputStream out = null;
         URLConnection conn;
         InputStream in = null;
+        File tempFile = null;
         try
         {
             URL url = address.toURL();
-            out = new BufferedOutputStream( new FileOutputStream( destination ) );
+            tempFile = File.createTempFile("maven", "temp");
+            out = new BufferedOutputStream( new FileOutputStream( tempFile ) );
             conn = url.openConnection();
             final String userAgentValue = calculateUserAgent();
             conn.setRequestProperty( "User-Agent", userAgentValue );
@@ -106,6 +109,9 @@ public class DefaultDownloader
             if ( out != null )
             {
                 out.close();
+            }
+            if (tempFile != null) {
+                Files.move(tempFile.toPath(), destination.toPath());
             }
         }
     }
